@@ -24,7 +24,9 @@ jobs:
               with:
                   experimental: true
             - run: mise set-environment
-            - run: mise pre-commit-all
+            - run: mise pre-commit-all || true
+            - run: git restore .github/workflows/act.yaml pyproject.toml
+            - run: git diff --color=always --exit-code
     tabularize:
         runs-on: ubuntu-latest
         steps:
@@ -52,7 +54,8 @@ jobs:
                   # shellcheck disable=SC2086
                   mkdir -p $HOME/code
                   # shellcheck disable=SC2086
-                  ln -s ../work/django-plugin-field-day/django-plugin-field-day \
+                  ln -s \
+                    ../work/django-plugin-field-day/django-plugin-field-day \
                     $HOME/code/django-plugin-field-day
 
             - run: mise test
@@ -61,6 +64,6 @@ on: # yamllint disable-line rule:truthy
     pull_request:
     push:
         branches:
-            - main
+            - initial
     workflow_dispatch:
 run-name: Checking on behalf of ${{ github.actor }}

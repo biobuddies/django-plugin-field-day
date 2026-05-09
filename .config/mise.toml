@@ -47,7 +47,7 @@ fi
 run = 'git describe --abbrev=40 --always --dirty --match=-'
 
 [tasks.orgn]
-run = 'echo github-organization-unknown'
+run = 'echo biobuddies'
 
 [tasks.run-on-sources]
 quiet = true
@@ -183,7 +183,7 @@ cat <<EOD | tee -a "${GITHUB_ENV:-/tmp/flan.ini}"
 CONA=django-plugin-field-day
 ENVI=$(mise envi)
 GIHA=$(mise giha)
-ORGN=github-organization-unknown
+ORGN=biobuddies
 ROLE=${ROLE-}
 TABR=$(mise tabr)
 EOD
@@ -212,7 +212,7 @@ cat <<EOD | tee "${GITHUB_STEP_SUMMARY:-/dev/null}"
 | COdeNAme     | CONA | django-plugin-field-day |
 | ENVIronment  | ENVI | $(mise envi) |
 | GIt HAsH     | GIHA | $(mise giha) |
-| ORGanizatioN | ORGN | github-organization-unknown |
+| ORGanizatioN | ORGN | biobuddies |
 | ROLE         | ROLE | ${ROLE-} |
 | TAg/BRanch   | TABR | $(mise tabr) |
 EOD
@@ -335,9 +335,6 @@ run = 'git diff --color=always --exit-code'
 
 [tasks.pre-commit]
 depends = ['pre-commit-fast']
-
-[tasks.build]
-run = 'docker compose build "$@"'
 
 [tasks.pre-commit-all]
 depends = [

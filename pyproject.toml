@@ -30,7 +30,9 @@ pre-commit = [
 ]
 test = [
     'pytest',
+    'pytest',
     'pytest-cov',
+    'pytest-django',
 ]
 
 
