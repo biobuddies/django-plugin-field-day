@@ -1,2 +1,30 @@
+[tasks.dcb]
+run = 'docker compose --progress=plain build "$@"'
+
 [tasks.build]
-run = 'docker compose build "$@"'
+run = """
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+rm -rf dist
+.venv/bin/python -m build
+.venv/bin/python -m twine check --strict dist/*
+"""
+
+[tasks.upload]
+run = """
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+if [[ $(git describe --exact-match --tags) != v20* ]]; then
+    echo 'ERROR: Please tag in gvcount or yucount format before uploading'
+    exit 1
+fi
+if [[ ${TWINE_USERNAME-} != '__token__' || -z ${TWINE_PASSWORD-} ]]; then
+    echo 'ERROR: Please set TWINE_USERNAME=__token__ and TWINE_PASSWORD=...'
+    exit 1
+fi
+.venv/bin/python -m twine upload dist/*
+"""
+
+[tools]
+python = '3.12'
+uv = 'latest'
