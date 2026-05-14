@@ -44,6 +44,7 @@ test = [
     'pytest-django',
 ]
 build = ['build', 'twine']
+play = ['django-plugin-extensions']
 
 [project.urls]
 source = 'https://github.com/biobuddies/django-plugin-field-day'
