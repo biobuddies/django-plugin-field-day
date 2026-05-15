@@ -1,0 +1,25 @@
+services:
+    postgres:
+        build: .
+        command: postgres
+        healthcheck:
+            test: ['CMD', 'pg_isready']
+            interval: 1s
+            timeout: 5s
+            retries: 30
+        ports:
+            - '5432:5432'
+        tmpfs:
+            - /var/lib/postgresql/data
+    mariadb:
+        build: .
+        command: mariadb
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '--silent']
+            interval: 1s
+            timeout: 5s
+            retries: 30
+        ports:
+            - '3306:3306'
+        tmpfs:
+            - /var/lib/mysql

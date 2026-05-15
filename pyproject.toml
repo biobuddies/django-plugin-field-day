@@ -39,6 +39,7 @@ pre-commit = [
     'yamllint',
 ]
 test = [
+    'django-plugin-database-url',
     'pytest',
     'pytest-cov',
     'pytest-django',

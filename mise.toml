@@ -25,6 +25,23 @@ fi
 .venv/bin/python -m twine upload dist/*
 """
 
+[tasks.test-all]
+run = """
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+
+echo '=== sqlite ==='
+mise test
+
+echo '=== postgres ==='
+DATABASE_URL=postgres://postgres@127.0.0.1:5432/postgres mise test
+
+echo '=== mariadb ==='
+DATABASE_URL=mysql://root@127.0.0.1:3306/test mise test
+
+echo 'All backends passed.'
+"""
+
 [tools]
 python = '3.12'
 uv = 'latest'
