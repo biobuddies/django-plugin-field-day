@@ -1,7 +1,20 @@
+[build-system]
+backend-path = ['']
+build-backend = 'pypi_compatible_build'
+requires = ['setuptools>=61.0', 'setuptools_scm[toml]>=6.2', 'wheel']
+
 [project]
+classifiers = [
+    'Programming Language :: Python :: 3.12',
+    'Operating System :: OS Independent',
+    'Framework :: Django',
+]
+description = 'A Django plugin for field day events'
+license = 'BSD-3-Clause'
 name = 'django-plugin-field-day'
+readme = 'README.md'
 requires-python = '>=3.12'
-version = '0'
+dynamic = ['version']
 
 dependencies = [
     'django',
@@ -13,6 +26,7 @@ pre-commit = [
     'actionlint-py',
     'basedpyright',
     'cookiecutter',
+    'django-stubs>=6.0.4',
     'django-upgrade',
     'djlint',
     'hadolint-py @ git+https://github.com/AleksaC/hadolint-py.git',
@@ -26,13 +40,30 @@ pre-commit = [
     'yamllint',
 ]
 test = [
+    'django-plugin-database-url',
     'pytest',
     'pytest-cov',
     'pytest-django',
 ]
+build = ['build', 'twine']
+play = ['django-plugin-extensions']
+
+[project.urls]
+source = 'https://github.com/biobuddies/django-plugin-field-day'
+
+[tool.setuptools]
+packages = ['django_plugin_field_day']
+
+[tool.setuptools_scm]
 
 [tool.basedpyright]
 extends = '.biobuddies/basedpyright.toml'
 
 [tool.ruff]
 extend = '.biobuddies/ruff.toml'
+
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]
