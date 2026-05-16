@@ -1,0 +1,47 @@
+[tasks.dcb]
+run = 'docker compose --progress=plain build "$@"'
+
+[tasks.build]
+run = """
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+rm -rf dist
+.venv/bin/python -m build
+.venv/bin/python -m twine check --strict dist/*
+"""
+
+[tasks.upload]
+run = """
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+if [[ $(git describe --exact-match --tags) != v20* ]]; then
+    echo 'ERROR: Please tag in gvcount or yucount format before uploading'
+    exit 1
+fi
+if [[ ${TWINE_USERNAME-} != '__token__' || -z ${TWINE_PASSWORD-} ]]; then
+    echo 'ERROR: Please set TWINE_USERNAME=__token__ and TWINE_PASSWORD=...'
+    exit 1
+fi
+.venv/bin/python -m twine upload dist/*
+"""
+
+[tasks.test-all]
+run = """
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+
+echo '=== sqlite ==='
+mise test
+
+echo '=== postgres ==='
+DATABASE_URL=postgres://postgres@127.0.0.1:5432/postgres mise test
+
+echo '=== mariadb ==='
+DATABASE_URL=mysql://root@127.0.0.1:3306/test mise test
+
+echo 'All backends passed.'
+"""
+
+[tools]
+python = '3.12'
+uv = 'latest'
