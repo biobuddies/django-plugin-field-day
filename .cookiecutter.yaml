@@ -1,0 +1,9 @@
+default_context:
+    languages: Node,Python
+    python_dependencies:
+        - django
+        - djp
+    python_optional_dependencies:
+        test:
+            - pytest
+            - pytest-django
