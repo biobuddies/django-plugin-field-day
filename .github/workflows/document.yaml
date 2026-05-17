@@ -10,6 +10,9 @@ defaults:
 jobs:
     export-docs:
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            pull-requests: write
         steps:
             - uses: actions/checkout@v6
             - name: Build Docker image via compose
@@ -19,32 +22,36 @@ jobs:
                   echo '=== /usr/share/doc contents ==='
                   docker compose run --rm --entrypoint find postgres \
                       /usr/share/doc -maxdepth 2 -type d || true
-                  echo '=== postgresql-doc-17 tree ==='
-                  docker compose run --rm --entrypoint find postgres \
-                      /usr/share/doc/postgresql-doc-17/html \
-                      -maxdepth 1 -type f | head -20 || true
-                  echo '=== sqlite3-doc tree ==='
-                  docker compose run --rm --entrypoint find postgres \
-                      /usr/share/doc/sqlite3 \
-                      -maxdepth 1 -type f | head -20 || true
                   echo '=== mariadb-server doc ==='
                   docker compose run --rm --entrypoint find postgres \
                       /usr/share/doc/mariadb-server \
                       -maxdepth 1 -type f || true
+                  echo '=== mariadb-server-core doc ==='
+                  docker compose run --rm --entrypoint find postgres \
+                      /usr/share/doc/mariadb-server-core \
+                      -maxdepth 1 -type f || true
+                  echo '=== postgresql-doc-17 tree ==='
+                  docker compose run --rm --entrypoint find postgres \
+                      /usr/share/doc/postgresql-doc-17 \
+                      -maxdepth 2 -type f | head -20 || true
+                  echo '=== sqlite3-doc tree ==='
+                  docker compose run --rm --entrypoint find postgres \
+                      /usr/share/doc/sqlite3 \
+                      -maxdepth 1 -type f | head -20 || true
             - name: Extract documentation from image
               run: |
                   docker compose create postgres
-                  mkdir -p documents/postgresql documents/sqlite documents/mariadb
-                  docker compose cp \
-                      postgres:/usr/share/doc/postgresql-doc-17/html/. \
-                      documents/postgresql/
-                  docker compose cp \
-                      postgres:/usr/share/doc/sqlite3/. \
-                      documents/sqlite/
+                  mkdir -p documents/mariadb documents/postgresql documents/sqlite
                   # MariaDB has no doc package on Debian trixie
                   docker compose cp \
                       postgres:/usr/share/doc/mariadb-server/. \
                       documents/mariadb/ || true
+                  docker compose cp \
+                      postgres:/usr/share/doc/postgresql-doc-17/. \
+                      documents/postgresql/ || true
+                  docker compose cp \
+                      postgres:/usr/share/doc/sqlite3/. \
+                      documents/sqlite/
                   docker compose down
                   echo '<!DOCTYPE html><title>MariaDB docs</title>
                   <p>No <code>mariadb-doc</code> HTML package on Debian trixie.
@@ -62,8 +69,8 @@ jobs:
                   body: >
                       Automated extraction of HTML documentation from the
                       Docker image:
-                      - **PostgreSQL 17** from `postgresql-doc-17` package
-                      - **SQLite** from `sqlite3-doc` package
                       - **MariaDB**: `mariadb-doc` not on Debian trixie
                         — placeholder page added
+                      - **PostgreSQL 17** from `postgresql-doc-17` package
+                      - **SQLite** from `sqlite3-doc` package
                   labels: documentation
