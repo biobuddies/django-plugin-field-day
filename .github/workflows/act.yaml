@@ -51,7 +51,8 @@ jobs:
                     ../work/django-plugin-field-day/django-plugin-field-day \
                     $HOME/code/django-plugin-field-day
 
-            - run: mise test
+            - run: mise test || { code=$?; [ "$code" -eq 5 ]
+                  && echo "No tests collected (branch before code-tests)"; }
 
 on: # yamllint disable-line rule:truthy
     pull_request:
