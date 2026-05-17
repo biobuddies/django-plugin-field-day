@@ -1,0 +1,43 @@
+name: export-docs
+on: # yamllint disable-line rule:truthy
+    push:
+        branches:
+            - ci-packaging
+    workflow_dispatch:
+defaults:
+    run:
+        shell: bash --noprofile --norc -o errexit -o nounset -o pipefail -o xtrace {0}
+jobs:
+    export-docs:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - name: Build Docker image
+              run: docker build -t django-plugin-field-day .
+            - name: Extract documentation from image
+              run: |
+                  container_id=$(docker create django-plugin-field-day)
+                  mkdir -p docs/postgresql docs/sqlite docs/mariadb
+                  docker cp "$container_id:/usr/share/doc/postgresql-doc-17/html/." docs/postgresql/
+                  docker cp "$container_id:/usr/share/doc/sqlite3/." docs/sqlite/
+                  # MariaDB has no doc package on Debian trixie; copy whatever exists
+                  docker cp "$container_id:/usr/share/doc/mariadb-server/." docs/mariadb/ || true
+                  docker rm "$container_id"
+                  echo '<!DOCTYPE html><title>MariaDB docs</title>
+                  <p>No <code>mariadb-doc</code> HTML package on Debian trixie.
+                  See <a href="https://mariadb.com/kb/">mariadb.com/kb</a>.' \
+                      > docs/mariadb/index.html
+                  git add docs/
+            - name: Create pull request
+              uses: peter-evans/create-pull-request@v7
+              with:
+                  branch: docs/extracted-db-docs
+                  commit-message: 'Extract DB documentation from Docker image'
+                  title: Extract database documentation from Docker image
+                  body: >
+                      Automated extraction of HTML documentation from the Docker image:
+                      - **PostgreSQL 17** from `postgresql-doc-17` package
+                      - **SQLite** from `sqlite3-doc` package
+                      - **MariaDB**: `mariadb-doc` not on Debian trixie
+                        — placeholder page added
+                  labels: documentation
