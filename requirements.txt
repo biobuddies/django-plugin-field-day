@@ -182,6 +182,8 @@ ruff==0.15.13
     # via django-plugin-field-day (pyproject.toml)
 secretstorage==3.5.0
     # via keyring
+setuptools==82.0.1
+    # via django-plugin-field-day (pyproject.toml)
 shellcheck-py==0.11.0.1
     # via django-plugin-field-day (pyproject.toml)
 shfmt-py==4.0.0

@@ -33,6 +33,7 @@ pre-commit = [
     'pre-commit-hooks',
     'pyrefly',
     'ruff',
+    'setuptools',
     'shellcheck-py',
     'shfmt-py',
     'typos',
