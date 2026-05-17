@@ -12,21 +12,48 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
-            - name: Build Docker image
-              run: docker build -t django-plugin-field-day .
+            - name: Build Docker image via compose
+              run: docker compose build
+            - name: Inspect installed doc packages
+              run: |
+                  image_tag=$(docker compose images -q postgres)
+                  echo '=== /usr/share/doc contents ==='
+                  docker run --rm --entrypoint find "$image_tag" /usr/share/doc \
+                      -maxdepth 2 -type d || true
+                  echo '=== postgresql-doc-17 tree ==='
+                  docker run --rm --entrypoint find "$image_tag" \
+                      /usr/share/doc/postgresql-doc-17/html \
+                      -maxdepth 1 -type f | head -20 || true
+                  echo '=== sqlite3-doc tree ==='
+                  docker run --rm --entrypoint find "$image_tag" \
+                      /usr/share/doc/sqlite3 \
+                      -maxdepth 1 -type f | head -20 || true
+                  echo '=== mariadb-server doc ==='
+                  docker run --rm --entrypoint find "$image_tag" \
+                      /usr/share/doc/mariadb-server \
+                      -maxdepth 1 -type f || true
             - name: Extract documentation from image
               run: |
-                  container_id=$(docker create django-plugin-field-day)
+                  image_tag=$(docker compose images -q postgres)
+                  container_id=$(docker create "$image_tag")
                   mkdir -p docs/postgresql docs/sqlite docs/mariadb
-                  docker cp "$container_id:/usr/share/doc/postgresql-doc-17/html/." docs/postgresql/
-                  docker cp "$container_id:/usr/share/doc/sqlite3/." docs/sqlite/
-                  # MariaDB has no doc package on Debian trixie; copy whatever exists
-                  docker cp "$container_id:/usr/share/doc/mariadb-server/." docs/mariadb/ || true
+                  docker cp \
+                      "$container_id:/usr/share/doc/postgresql-doc-17/html/." \
+                      docs/postgresql/
+                  docker cp \
+                      "$container_id:/usr/share/doc/sqlite3/." \
+                      docs/sqlite/
+                  # MariaDB has no doc package on Debian trixie
+                  docker cp \
+                      "$container_id:/usr/share/doc/mariadb-server/." \
+                      docs/mariadb/ || true
                   docker rm "$container_id"
                   echo '<!DOCTYPE html><title>MariaDB docs</title>
                   <p>No <code>mariadb-doc</code> HTML package on Debian trixie.
                   See <a href="https://mariadb.com/kb/">mariadb.com/kb</a>.' \
                       > docs/mariadb/index.html
+                  echo '=== extracted docs tree ==='
+                  find docs -maxdepth 3 -type d
                   git add docs/
             - name: Create pull request
               uses: peter-evans/create-pull-request@v7
@@ -35,7 +62,8 @@ jobs:
                   commit-message: 'Extract DB documentation from Docker image'
                   title: Extract database documentation from Docker image
                   body: >
-                      Automated extraction of HTML documentation from the Docker image:
+                      Automated extraction of HTML documentation from the
+                      Docker image:
                       - **PostgreSQL 17** from `postgresql-doc-17` package
                       - **SQLite** from `sqlite3-doc` package
                       - **MariaDB**: `mariadb-doc` not on Debian trixie
