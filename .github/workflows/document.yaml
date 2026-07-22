@@ -61,6 +61,7 @@ jobs:
                   find documents -maxdepth 3 -type d
                   git add documents/
             - name: Create pull request
+              continue-on-error: true # tolerate policy blocking Actions-authored PRs
               uses: peter-evans/create-pull-request@v7
               with:
                   branch: documents/extracted-db-documents
