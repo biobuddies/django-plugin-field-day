@@ -9,7 +9,7 @@ classifiers = [
     'Operating System :: OS Independent',
     'Framework :: Django',
 ]
-description = 'A Django plugin for field day events'
+description = 'New and improved fields for Django'
 license = 'BSD-3-Clause'
 name = 'django-plugin-field-day'
 readme = 'README.md'
