@@ -1,9 +1,7 @@
 FROM debian:trixie-slim
 
-# Copy PostgreSQL signing key
 COPY postgresql-keyring.gpg /usr/share/keyrings/postgresql-keyring.gpg
 
-# Install system dependencies
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sqlite3 \
