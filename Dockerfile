@@ -1,6 +1,6 @@
 FROM debian:trixie-slim
 
-COPY postgresql-keyring.gpg /usr/share/keyrings/postgresql-keyring.gpg
+COPY postgresql-keyring.asc /usr/share/keyrings/postgresql-keyring.asc
 
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sqlite3-doc \
     mariadb-server \
     mariadb-client \
-    && echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.asc] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
     # hadolint ignore=DL3008
     && apt-get install -y --no-install-recommends \
