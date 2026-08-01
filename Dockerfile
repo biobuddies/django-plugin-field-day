@@ -22,6 +22,9 @@ ENV PGDATA="/var/lib/postgresql/data"
 
 RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA"
 
+RUN mkdir -p /etc/postgresql \
+    && printf 'local all all trust\nhost all all 0.0.0.0/0 trust\n' > /etc/postgresql/pg_hba.conf
+
 COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 5432 3306

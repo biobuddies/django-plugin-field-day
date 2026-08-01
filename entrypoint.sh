@@ -5,10 +5,9 @@ case "${1:-}" in
     postgres)
         if [ -z "$(ls -A "$PGDATA")" ]; then
             su -m postgres -c "initdb -D $PGDATA"
-            echo "host all all 0.0.0.0/0 trust" >>"$PGDATA/pg_hba.conf"
         fi
-        echo "listen_addresses='*'" >>"$PGDATA/postgresql.conf"
-        exec su -m postgres -c "postgres -D $PGDATA"
+        exec su -m postgres -c \
+            "postgres -D $PGDATA -c hba_file=/etc/postgresql/pg_hba.conf -c listen_addresses='*'"
         ;;
     mariadb)
         if [ ! -d /var/lib/mysql/mysql ]; then
