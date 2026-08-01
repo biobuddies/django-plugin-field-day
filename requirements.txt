@@ -10,8 +10,12 @@ basedpyright==1.39.4
     # via django-plugin-field-day (pyproject.toml)
 binaryornot==0.6.0
     # via cookiecutter
+build==1.5.0
+    # via django-plugin-field-day (pyproject.toml)
 certifi==2026.4.22
     # via requests
+cffi==2.0.0
+    # via cryptography
 charset-normalizer==3.4.7
     # via requests
 click==8.3.3
@@ -24,18 +28,43 @@ cookiecutter==2.7.1
     # via django-plugin-field-day (pyproject.toml)
 coverage==7.14.0
     # via pytest-cov
+cryptography==48.0.0
+    # via secretstorage
 cssbeautifier==1.15.4
     # via djlint
+dj-database-url==3.1.2
+    # via django-plugin-database-url
 django==6.0.5
     # via
     #   django-plugin-field-day (pyproject.toml)
+    #   dj-database-url
+    #   django-extensions
+    #   django-plugin-database-url
+    #   django-plugin-extensions
+    #   django-stubs
+    #   django-stubs-ext
     #   djp
+django-extensions==4.1
+    # via django-plugin-extensions
+django-plugin-database-url==0.1
+    # via django-plugin-field-day (pyproject.toml)
+django-plugin-extensions==0.1.2
+    # via django-plugin-field-day (pyproject.toml)
+django-stubs==6.0.4
+    # via django-plugin-field-day (pyproject.toml)
+django-stubs-ext==6.0.4
+    # via django-stubs
 django-upgrade==1.30.0
     # via django-plugin-field-day (pyproject.toml)
 djlint==1.36.4
     # via django-plugin-field-day (pyproject.toml)
 djp==0.3.1
-    # via django-plugin-field-day (pyproject.toml)
+    # via
+    #   django-plugin-field-day (pyproject.toml)
+    #   django-plugin-database-url
+    #   django-plugin-extensions
+docutils==0.22.4
+    # via readme-renderer
 editorconfig==0.17.1
     # via
     #   cssbeautifier
@@ -44,10 +73,22 @@ fastjsonschema==2.21.2
     # via validate-pyproject
 hadolint-py @ git+https://github.com/AleksaC/hadolint-py.git@446db46ab58b26eb8e40d5626c1229e8cf75b3b5
     # via django-plugin-field-day (pyproject.toml)
+id==1.6.1
+    # via twine
 idna==3.15
     # via requests
 iniconfig==2.3.0
     # via pytest
+jaraco-classes==3.4.0
+    # via keyring
+jaraco-context==6.1.2
+    # via keyring
+jaraco-functools==4.5.0
+    # via keyring
+jeepney==0.9.0
+    # via
+    #   keyring
+    #   secretstorage
 jinja2==3.1.6
     # via cookiecutter
 jsbeautifier==1.15.4
@@ -56,17 +97,27 @@ jsbeautifier==1.15.4
     #   djlint
 json5==0.14.0
     # via djlint
+keyring==25.7.0
+    # via twine
 markdown-it-py==4.2.0
     # via rich
 markupsafe==3.0.3
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
+more-itertools==11.0.2
+    # via
+    #   jaraco-classes
+    #   jaraco-functools
+nh3==0.3.5
+    # via readme-renderer
 nodejs-wheel-binaries==24.15.0
     # via basedpyright
 packaging==26.2
     # via
+    #   build
     #   pytest
+    #   twine
     #   validate-pyproject
 pathspec==1.1.1
     # via
@@ -79,10 +130,15 @@ pluggy==1.6.0
     #   pytest-cov
 pre-commit-hooks==6.0.0
     # via django-plugin-field-day (pyproject.toml)
+pycparser==3.0
+    # via cffi
 pygments==2.20.0
     # via
     #   pytest
+    #   readme-renderer
     #   rich
+pyproject-hooks==1.2.0
+    # via build
 pyrefly==1.0.0
     # via django-plugin-field-day (pyproject.toml)
 pytest==9.0.3
@@ -103,15 +159,30 @@ pyyaml==6.0.3
     #   cookiecutter
     #   djlint
     #   yamllint
+readme-renderer==44.0
+    # via twine
 regex==2026.5.9
     # via djlint
 requests==2.34.2
-    # via cookiecutter
+    # via
+    #   cookiecutter
+    #   requests-toolbelt
+    #   twine
+requests-toolbelt==1.0.0
+    # via twine
+rfc3986==2.0.0
+    # via twine
 rich==15.0.0
-    # via cookiecutter
+    # via
+    #   cookiecutter
+    #   twine
 ruamel-yaml==0.19.1
     # via pre-commit-hooks
 ruff==0.15.13
+    # via django-plugin-field-day (pyproject.toml)
+secretstorage==3.5.0
+    # via keyring
+setuptools==82.0.1
     # via django-plugin-field-day (pyproject.toml)
 shellcheck-py==0.11.0.1
     # via django-plugin-field-day (pyproject.toml)
@@ -132,12 +203,23 @@ tqdm==4.67.3
     # via djlint
 trove-classifiers==2026.5.7.17
     # via validate-pyproject
+twine==6.2.0
+    # via django-plugin-field-day (pyproject.toml)
+types-pyyaml==6.0.12.20260510
+    # via django-stubs
+typing-extensions==4.15.0
+    # via
+    #   django-stubs
+    #   django-stubs-ext
 typos==1.46.1
     # via django-plugin-field-day (pyproject.toml)
 tzdata==2026.2
     # via arrow
 urllib3==2.7.0
-    # via requests
+    # via
+    #   id
+    #   requests
+    #   twine
 validate-pyproject==0.25
     # via django-plugin-field-day (pyproject.toml)
 yamllint==1.38.0

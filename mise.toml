@@ -45,3 +45,6 @@ echo 'All backends passed.'
 [tools]
 python = '3.12'
 uv = 'latest'
+
+[tasks.cookiecutter]
+run = ':'

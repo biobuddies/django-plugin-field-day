@@ -1,0 +1,2 @@
+include pypi_compatible_build.py
+include pyproject.toml

@@ -1,0 +1,32 @@
+FROM debian:trixie-slim
+
+COPY postgresql-keyring.asc /usr/share/keyrings/postgresql-keyring.asc
+
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    sqlite3 \
+    sqlite3-doc \
+    mariadb-server \
+    mariadb-client \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.asc] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    # hadolint ignore=DL3008
+    && apt-get install -y --no-install-recommends \
+    postgresql-17 \
+    postgresql-client-17 \
+    postgresql-doc-17 \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/usr/lib/postgresql/17/bin:$PATH"
+ENV PGDATA="/var/lib/postgresql/data"
+
+RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA"
+
+RUN mkdir -p /etc/postgresql \
+    && printf 'local all all trust\nhost all all 0.0.0.0/0 trust\n' > /etc/postgresql/pg_hba.conf
+
+COPY entrypoint.sh /entrypoint.sh
+
+EXPOSE 5432 3306
+
+ENTRYPOINT ["/entrypoint.sh"]
