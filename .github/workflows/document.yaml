@@ -21,17 +21,14 @@ jobs:
               run: |
                   docker compose create postgres
                   mkdir -p documents/mariadb documents/postgresql documents/sqlite
-                  # MariaDB has no doc package on Debian trixie
-                  docker compose cp \
-                      postgres:/usr/share/doc/mariadb-server/. \
-                      documents/mariadb/ || true
                   docker compose cp \
                       postgres:/usr/share/doc/postgresql-doc-17/. \
-                      documents/postgresql/ || true
+                      documents/postgresql/
                   docker compose cp \
                       postgres:/usr/share/doc/sqlite3/. \
                       documents/sqlite/
                   docker compose down
+                  # MariaDB has no doc package on Debian trixie
                   echo '<!DOCTYPE html><title>MariaDB docs</title>
                   <p>No <code>mariadb-doc</code> HTML package on Debian trixie.
                   See <a href="https://mariadb.com/kb/">mariadb.com/kb</a>.' \
