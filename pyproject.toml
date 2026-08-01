@@ -22,6 +22,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+build = ['build', 'twine']
+interact = ['django-plugin-extensions']
 pre-commit = [
     'actionlint-py',
     'basedpyright',
@@ -46,8 +48,6 @@ test = [
     'pytest-cov',
     'pytest-django',
 ]
-build = ['build', 'twine']
-interact = ['django-plugin-extensions']
 
 [project.urls]
 source = 'https://github.com/biobuddies/django-plugin-field-day'
