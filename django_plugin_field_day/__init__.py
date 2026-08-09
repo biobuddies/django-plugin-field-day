@@ -1,8 +1,7 @@
-from datetime import datetime
 from typing import Any
-from zoneinfo import ZoneInfo
 
 import djp
+from django.db import NotSupportedError
 from django.db.models import CharField, Func, Value
 from django.db.models.expressions import Expression
 from django.db.models.functions.text import Left as DjangoLeft
@@ -50,6 +49,48 @@ class Right(Left, DjangoRight):
         )
 
 
+# zoneinfo names that render +00:00 in every month of every year, so %z can hardcode +00:00
+UTC_TIME_ZONES = frozenset({
+    'Africa/Abidjan',
+    'Africa/Accra',
+    'Africa/Bamako',
+    'Africa/Banjul',
+    'Africa/Bissau',
+    'Africa/Conakry',
+    'Africa/Dakar',
+    'Africa/Freetown',
+    'Africa/Lome',
+    'Africa/Monrovia',
+    'Africa/Nouakchott',
+    'Africa/Ouagadougou',
+    'Africa/Sao_Tome',
+    'Africa/Timbuktu',
+    'America/Danmarkshavn',
+    'Atlantic/Reykjavik',
+    'Atlantic/St_Helena',
+    'Etc/GMT',
+    'Etc/GMT+0',
+    'Etc/GMT-0',
+    'Etc/GMT0',
+    'Etc/Greenwich',
+    'Etc/UCT',
+    'Etc/UTC',
+    'Etc/Universal',
+    'Etc/Zulu',
+    'Factory',
+    'GMT',
+    'GMT+0',
+    'GMT-0',
+    'GMT0',
+    'Greenwich',
+    'Iceland',
+    'UCT',
+    'UTC',
+    'Universal',
+    'Zulu',
+})
+
+
 class StrFTime(Func):
     """Format a datetime expression with SQL STRFTIME, supporting %z timezone offset from UTC."""
 
@@ -58,31 +99,31 @@ class StrFTime(Func):
 
     def __init__(self, expression: Expression, format_string: str, **extra: Any) -> None:
         self.format_string = format_string
-        escaped = format_string.replace('%', '%%%%')
-        self.template = f"%(function)s('{escaped}', %(expressions)s)"
+        self.template = "%(function)s('{}', %(expressions)s)".format(
+            format_string.replace('%', '%%%%')
+        )
         super().__init__(expression, **extra)
 
     def as_sqlite(self, compiler, connection):  # noqa: ANN001, ANN201  # pyrefly: ignore[bad-override]
-        """Append %z as a literal, since SQLite has no timezone database.
+        """Substitute %z with +00:00 in place, because SQLite formats the stored UTC value.
 
-        The literal holds the settings.TIME_ZONE offset in effect when the SQL is generated,
-        not the offset at the formatted datetime.
+        STRFTIME returns NULL for %z, so %%z carries it through as a literal for REPLACE.
+        Converting to an offset timezone would need the timezone database SQLite lacks, so
+        %z demands a TIME_ZONE that stays on UTC year round, such as UTC or Africa/Freetown.
         """
         from django.conf import settings  # noqa: PLC0415
 
-        format_string = self.format_string
-        tz_literal = ''
-        if '%z' in format_string:
-            format_string = format_string.replace('%z', '')
-            timezone_offset = datetime.now(ZoneInfo(settings.TIME_ZONE)).strftime('%z')
-            tz_literal = (
-                f'{timezone_offset[:3]}:{timezone_offset[3:]}' if timezone_offset else '+00:00'
+        if '%z' in self.format_string and settings.TIME_ZONE not in UTC_TIME_ZONES:
+            raise NotSupportedError(
+                f'%z on SQLite when TIME_ZONE={settings.TIME_ZONE} not supported yet'
             )
-        escaped = format_string.replace('%', '%%%%')
-        template = f"%(function)s('{escaped}', %(expressions)s)"
-        if tz_literal:
-            template += f" || '{tz_literal}'"
-        return self.as_sql(compiler, connection, template=template)
+        return self.as_sql(
+            compiler,
+            connection,
+            template="REPLACE({}, '%%%%z', '+00:00')".format(
+                self.template.replace('%%%%z', '%%%%%%%%z')
+            ),
+        )
 
 
 @djp.hookimpl
