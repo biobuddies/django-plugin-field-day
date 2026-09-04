@@ -53,7 +53,7 @@ test = [
 source = 'https://github.com/biobuddies/django-plugin-field-day'
 
 [tool.setuptools]
-packages = ['django_plugin_field_day']
+packages = ['django_plugin_field_day', 'django_plugin_field_day.migrations']
 
 [tool.setuptools_scm]
 
@@ -62,6 +62,11 @@ extends = '.biobuddies/basedpyright.toml'
 
 [tool.ruff]
 extend = '.biobuddies/ruff.toml'
+
+# Django generates migrations without module docstrings or annotations, and its Migration
+# attributes are lists by design.
+[tool.ruff.lint.extend-per-file-ignores]
+'**/migrations/*.py' = ['ANN001', 'ANN201', 'ARG001', 'D100', 'RUF012']
 
 [tool.pyrefly]
 project-includes = [

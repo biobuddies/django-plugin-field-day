@@ -201,3 +201,25 @@ qs = (
     )
 )
 ```
+
+### Country reference table
+
+The `Country` model is a naturally keyed ISO 3166-1 alpha-2 table: the two-letter `code` is the
+primary key, `name` comes straight from Chromium's libaddressinput, and `part_of` links a
+dependent territory to its sovereign, so Puerto Rico and the US Virgin Islands resolve to the
+US. Room remains for later columns such as a country-level postal-code regex.
+
+Add `'django_plugin_field_day'` to `INSTALLED_APPS`, then `migrate` to create and load the table:
+
+```python
+from django_plugin_field_day.models import Country
+
+Country.objects.filter(part_of='US').values_list('code', flat=True)
+```
+
+Refresh the data from Chromium, regenerating `django_plugin_field_day/countries.py`:
+
+<!--pytest.mark.skip -->
+```bash
+python scripts/fetch_countries.py
+```
