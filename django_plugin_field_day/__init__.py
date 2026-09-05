@@ -128,8 +128,9 @@ class StrFTime(Func):
 
 @djp.hookimpl
 def installed_apps() -> list:
-    # A list of app strings to add to INSTALLED_APPS:
-    return []
+    # djp injects the app so its models and migrations reach any consumer that installs this
+    # plugin. TODO: split the address/Country tables into their own app for opt-in loading.
+    return ['django_plugin_field_day']
 
 
 @djp.hookimpl

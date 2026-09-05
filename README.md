@@ -209,13 +209,18 @@ primary key, `name` comes straight from Chromium's libaddressinput, and `part_of
 dependent territory to its sovereign, so Puerto Rico and the US Virgin Islands resolve to the
 US. Room remains for later columns such as a country-level postal-code regex.
 
-Add `'django_plugin_field_day'` to `INSTALLED_APPS`, then `migrate` to create and load the table:
+DJP registers the app for you: `djp.settings(globals())` runs this plugin's `installed_apps`
+hook, so `migrate` creates and loads the table with no `INSTALLED_APPS` edit.
 
 ```python
 from django_plugin_field_day.models import Country
 
 Country.objects.filter(part_of='US').values_list('code', flat=True)
 ```
+
+TODO: djp injection is all-or-nothing, so installing the plugin for `Left`, `Right`, or
+`StrFTime` also loads the Country data migration. Split the address tables into their own app
+(or gate the migration on a setting) so consumers opt into the reference data.
 
 Refresh the data from Chromium, regenerating `django_plugin_field_day/countries.py`:
 

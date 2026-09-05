@@ -49,6 +49,9 @@ test = [
     'pytest-django',
 ]
 
+[project.entry-points.djp]
+django_plugin_field_day = 'django_plugin_field_day'
+
 [project.urls]
 source = 'https://github.com/biobuddies/django-plugin-field-day'
 
