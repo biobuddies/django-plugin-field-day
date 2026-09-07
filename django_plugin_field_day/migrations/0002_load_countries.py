@@ -1,11 +1,13 @@
 from typing import Final
 
 from django.db import migrations
+from django.db.backends.base.schema import BaseDatabaseSchemaEditor
+from django.db.migrations.state import StateApps
 
 from django_plugin_field_day.countries import COUNTRIES
 
 
-def load_countries(apps, schema_editor):
+def load_countries(apps: StateApps, schema_editor: BaseDatabaseSchemaEditor) -> None:
     Country = apps.get_model('django_plugin_field_day', 'Country')
     Country.objects.bulk_create(Country(code=code, name=name) for code, name, _part_of in COUNTRIES)
     Country.objects.bulk_update(
@@ -14,7 +16,7 @@ def load_countries(apps, schema_editor):
     )
 
 
-def drop_countries(apps, schema_editor):
+def drop_countries(apps: StateApps, schema_editor: BaseDatabaseSchemaEditor) -> None:
     countries = apps.get_model('django_plugin_field_day', 'Country').objects
     countries.update(part_of=None)  # release PROTECTed self-references before deleting
     countries.all().delete()
