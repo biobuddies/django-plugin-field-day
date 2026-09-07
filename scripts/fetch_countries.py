@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 DATA_URL = 'https://chromium-i18n.appspot.com/ssl-address/data'
 
-# US unincorporated territories, keyed to the US country code. Chromium lists them as USPS
+# United States territories: Chromium lists them as USPS
 # subdivisions without encoding sovereignty, so this curation excludes the independent Compact
 # of Free Association states (FM, MH, PW) that USPS also serves.
 PART_OF = {'AS': 'US', 'GU': 'US', 'MP': 'US', 'PR': 'US', 'UM': 'US', 'VI': 'US'}
