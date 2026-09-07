@@ -1,3 +1,5 @@
+from typing import Final
+
 from django.db import migrations
 
 from django_plugin_field_day.countries import COUNTRIES
@@ -19,5 +21,5 @@ def drop_countries(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [('django_plugin_field_day', '0001_initial')]
-    operations = [migrations.RunPython(load_countries, drop_countries)]
+    dependencies: Final = [('django_plugin_field_day', '0001_initial')]
+    operations: Final = [migrations.RunPython(load_countries, drop_countries)]

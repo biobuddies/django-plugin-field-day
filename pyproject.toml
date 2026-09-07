@@ -62,17 +62,23 @@ packages = ['django_plugin_field_day', 'django_plugin_field_day.migrations']
 
 [tool.basedpyright]
 extends = '.biobuddies/basedpyright.toml'
+# Final on a migration's dependencies/operations is a legitimate non-final to Final specialization
+reportIncompatibleVariableOverride = false
 
 [tool.ruff]
 extend = '.biobuddies/ruff.toml'
 
-# Django generates migrations without module docstrings or annotations, and its Migration
-# attributes are lists by design.
+# Django generates migrations without module docstrings, and RunPython receives untyped apps
+# and schema_editor. Final annotations satisfy RUF012 on dependencies and operations.
 [tool.ruff.lint.extend-per-file-ignores]
-'**/migrations/*.py' = ['ANN001', 'ANN201', 'ARG001', 'D100', 'RUF012']
+'**/migrations/*.py' = ['ANN001', 'ANN201', 'ARG001', 'D100']
 
 [tool.pyrefly]
 project-includes = [
     "**/*.py*",
     "**/*.ipynb",
 ]
+
+# Final specializes a migration's inherited ClassVar dependencies/operations, which is deliberate
+[tool.pyrefly.errors]
+bad-override = false
