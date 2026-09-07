@@ -1,6 +1,7 @@
 from typing import Final
 
-from django.db import migrations
+import django.db.models.deletion
+from django.db import migrations, models
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.migrations.state import StateApps
 
@@ -23,5 +24,27 @@ def drop_countries(apps: StateApps, _schema_editor: BaseDatabaseSchemaEditor) ->
 
 
 class Migration(migrations.Migration):
-    dependencies: Final = [('django_plugin_field_day', '0001_initial')]
-    operations: Final = [migrations.RunPython(load_countries, drop_countries)]
+    initial = True
+
+    dependencies: Final = []
+
+    operations: Final = [
+        migrations.CreateModel(
+            name='Country',
+            fields=[
+                ('code', models.CharField(max_length=2, primary_key=True, serialize=False)),
+                ('name', models.CharField(max_length=50)),
+                (
+                    'part_of',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name='parts',
+                        to='django_plugin_field_day.country',
+                    ),
+                ),
+            ],
+        ),
+        migrations.RunPython(load_countries, drop_countries),
+    ]
