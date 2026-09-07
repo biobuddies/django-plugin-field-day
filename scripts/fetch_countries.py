@@ -1,46 +1,77 @@
-"""Regenerate django_plugin_field_day/countries.py from Chromium's libaddressinput.
+"""Regenerate django_plugin_field_day/countries.py from Chromium libaddressinput.
 
-The service at https://chromium-i18n.appspot.com/ssl-address/data lists ISO 3166-1 alpha-2
-codes; each per-country document carries the display name (and, someday, the postal-code
-regex we may add). Run: python scripts/fetch_countries.py
+The index at https://chromium-i18n.appspot.com/ssl-address/data lists ISO 3166-1 alpha-2 codes;
+each per-country document carries the display name and, for many, the ISO 3166-2 subdivisions in
+parallel sub_isoids/sub_names arrays. One throttled async pass fetches every document once and
+writes both the COUNTRIES table and the REGIONS map. Run: python scripts/fetch_countries.py
 """
 
-import json
-import logging
+import asyncio
 from pathlib import Path
-from urllib.request import urlopen
 
-logger = logging.getLogger(__name__)
+from aiohttp import ClientSession, TCPConnector
 
+DATA = Path(__file__).resolve().parent.parent / 'django_plugin_field_day'
 DATA_URL = 'https://chromium-i18n.appspot.com/ssl-address/data'
 
-# United States territories: Chromium lists them as USPS
-# subdivisions without encoding sovereignty, so this curation excludes the independent Compact
-# of Free Association states (FM, MH, PW) that USPS also serves.
-PART_OF = {'AS': 'US', 'GU': 'US', 'MP': 'US', 'PR': 'US', 'UM': 'US', 'VI': 'US'}
+# https://trevmex.com/post/826439929093636096/the-us-is-more-than-just-the-us-according-to
+# TODO add more https://en.wikipedia.org/wiki/ISO_3166-2#Subdivisions_included_in_ISO_3166-1
+TERRITORIES = {'US': ('AS', 'GU', 'MP', 'PR', 'UM', 'VI')}
 
 
-def fetch(path: str) -> dict[str, str]:
-    with urlopen(path, timeout=60) as response:  # noqa: S310
-        return json.load(response)
+async def main() -> None:
+    # Eight-way throttle: polite to the server and dodges proxy EOFs seen at full fan-out.
+    async with ClientSession(connector=TCPConnector(limit=8)) as session:
 
+        async def fetch(url: str) -> dict[str, str]:
+            async with session.get(url) as response:
+                return await response.json(content_type=None)
 
-def main() -> None:
-    logging.basicConfig(level=logging.INFO)
-    codes = fetch(DATA_URL)['countries'].split('~')
-    logger.info('Fetching %d countries', len(codes))
-    rows = ''.join(
-        f'    {(code, fetch(f"{DATA_URL}/{code}")["name"], PART_OF.get(code))!r},\n'
-        for code in codes
-    )
-    (
-        Path(__file__).resolve().parent.parent / 'django_plugin_field_day' / 'countries.py'
-    ).write_text(
-        '"""ISO 3166-1 alpha-2 countries from Chromium libaddressinput; see '
-        'scripts/fetch_countries.py."""\n\n'
-        f'COUNTRIES = (\n{rows})\n'
+        documents = {
+            document['key']: document
+            for document in await asyncio.gather(
+                *(
+                    fetch(f'{DATA_URL}/{code}')
+                    for code in (await fetch(DATA_URL))['countries'].split('~')
+                )
+            )
+        }
+
+    part_of = {code: sovereign for sovereign, codes in TERRITORIES.items() for code in codes}
+    regions = {
+        country: dict(
+            sorted(
+                (isoid, name)
+                for isoid, name in zip(
+                    documents[country].get('sub_isoids', '').split('~'),
+                    documents[country].get('sub_names', '').split('~'),
+                    strict=True,
+                )
+                if isoid
+            )
+        )
+        for country in ('US', *TERRITORIES['US'])  # TODO expand in waves
+    }
+    (DATA / 'countries.py').write_text(
+        '"""ISO 3166 countries and subdivisions from Chromium libaddressinput; see '
+        'fetch_countries.py."""\n\n'
+        'COUNTRIES = (\n'
+        + ''.join(
+            f'    {(code, document["name"], part_of.get(code))!r},\n'
+            for code, document in documents.items()
+        )
+        + ')\n\n'
+        'REGIONS = {\n'
+        + ''.join(
+            f'    {country!r}: {{\n'
+            + ''.join(f'        {suffix!r}: {name!r},\n' for suffix, name in members.items())
+            + '    },\n'
+            for country, members in regions.items()
+            if members
+        )
+        + '}\n'
     )
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

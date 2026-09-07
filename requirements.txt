@@ -2,10 +2,18 @@
 #    uv pip compile --all-extras --output-file requirements.txt --python-platform linux pyproject.toml
 actionlint-py==1.7.12.24
     # via django-plugin-field-day (pyproject.toml)
+aiohappyeyeballs==2.7.1
+    # via aiohttp
+aiohttp==3.14.3
+    # via django-plugin-field-day (pyproject.toml)
+aiosignal==1.4.0
+    # via aiohttp
 arrow==1.4.0
     # via cookiecutter
 asgiref==3.11.1
     # via django
+attrs==26.1.0
+    # via aiohttp
 basedpyright==1.39.4
     # via django-plugin-field-day (pyproject.toml)
 binaryornot==0.6.0
@@ -71,12 +79,18 @@ editorconfig==0.17.1
     #   jsbeautifier
 fastjsonschema==2.21.2
     # via validate-pyproject
+frozenlist==1.8.0
+    # via
+    #   aiohttp
+    #   aiosignal
 hadolint-py @ git+https://github.com/AleksaC/hadolint-py.git@6e7504451511eaeb62a3e7f14d63b0296cbf86eb
     # via django-plugin-field-day (pyproject.toml)
 id==1.6.1
     # via twine
 idna==3.15
-    # via requests
+    # via
+    #   requests
+    #   yarl
 iniconfig==2.3.0
     # via pytest
 jaraco-classes==3.4.0
@@ -109,6 +123,10 @@ more-itertools==11.0.2
     # via
     #   jaraco-classes
     #   jaraco-functools
+multidict==6.7.1
+    # via
+    #   aiohttp
+    #   yarl
 nh3==0.3.5
     # via readme-renderer
 nodejs-wheel-binaries==24.15.0
@@ -130,6 +148,10 @@ pluggy==1.6.0
     #   pytest-cov
 pre-commit-hooks==6.0.0
     # via django-plugin-field-day (pyproject.toml)
+propcache==0.5.2
+    # via
+    #   aiohttp
+    #   yarl
 pycparser==3.0
     # via cffi
 pygments==2.20.0
@@ -209,6 +231,8 @@ types-pyyaml==6.0.12.20260510
     # via django-stubs
 typing-extensions==4.15.0
     # via
+    #   aiohttp
+    #   aiosignal
     #   django-stubs
     #   django-stubs-ext
 typos==1.46.1
@@ -224,3 +248,5 @@ validate-pyproject==0.25
     # via django-plugin-field-day (pyproject.toml)
 yamllint==1.38.0
     # via django-plugin-field-day (pyproject.toml)
+yarl==1.24.5
+    # via aiohttp

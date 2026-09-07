@@ -222,9 +222,11 @@ TODO: djp injection is all-or-nothing, so installing the plugin for `Left`, `Rig
 `StrFTime` also loads the Country data migration. Split the address tables into their own app
 (or gate the migration on a setting) so consumers opt into the reference data.
 
-Refresh the data from Chromium, regenerating `django_plugin_field_day/countries.py`:
+## See Also
 
-<!--pytest.mark.skip -->
-```bash
-python scripts/fetch_countries.py
-```
+* [pycountry](https://github.com/pycountry/pycountry): ISO 3166/4217/15924/639 databases for Python
+* [Saleor's address model](https://github.com/saleor/saleor/blob/0a11eb911e006199daa1352ff5b76a07214f43fa/saleor/account/models.py#L63)
+* [Odoo's res.partner](https://github.com/odoo/odoo/blob/19.0/odoo/addons/base/models/res_partner.py)
+* [OpenStreetMap addr:* keys](https://wiki.openstreetmap.org/wiki/Key:addr:*)
+* [vCard ADR field, RFC 6350 §6.3](https://www.rfc-editor.org/info/rfc6350/#section-6.3)
+* [Open Location Code (plus codes)](https://github.com/google/open-location-code)

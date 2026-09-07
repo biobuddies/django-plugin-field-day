@@ -16,3 +16,19 @@ class Country(Model):
 
     def __str__(self) -> str:  # noqa: D105
         return f'{self.code} {self.name}'
+
+
+class Region(Model):
+    """ISO 3166-2 subdivision, naturally keyed by the qualified code ('US-CA').
+
+    The country is LEFT(code, 2); a ForeignKey to Country is left off for now. A directly
+    administered place needs no special casing: Singapore simply has no Region, while Shanghai
+    can take a synthetic eponymous row (code 'CN-SH', name 'Shanghai') should an address there
+    want a non-null region.
+    """
+
+    code = CharField(primary_key=True, max_length=6)
+    name = CharField(max_length=50)
+
+    def __str__(self) -> str:  # noqa: D105
+        return f'{self.code} {self.name}'

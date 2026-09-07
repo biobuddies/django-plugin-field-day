@@ -23,6 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 build = ['build', 'twine']
+fetch = ['aiohttp']
 interact = ['django-plugin-extensions']
 pre-commit = [
     'actionlint-py',
