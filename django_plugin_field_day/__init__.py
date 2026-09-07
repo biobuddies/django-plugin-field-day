@@ -128,8 +128,7 @@ class StrFTime(Func):
 
 @djp.hookimpl
 def installed_apps() -> list:
-    # A list of app strings to add to INSTALLED_APPS:
-    return []
+    return ['django_plugin_field_day']
 
 
 @djp.hookimpl

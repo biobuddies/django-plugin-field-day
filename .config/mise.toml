@@ -25,6 +25,7 @@ uv pip compile --all-extras --output-file requirements.txt --quiet \
     --python-platform linux pyproject.toml
 uv venv --allow-existing --no-progress
 uv pip sync requirements.txt
+uv pip install --editable . --no-deps --quiet # register the djp entry point after sync prunes
 wait "$npm_pid"
 mise generate pre-commit > .git/hooks/pre-commit
 """

@@ -49,22 +49,36 @@ test = [
     'pytest-django',
 ]
 
+[project.entry-points.djp]
+django_plugin_field_day = 'django_plugin_field_day'
+
 [project.urls]
 source = 'https://github.com/biobuddies/django-plugin-field-day'
 
 [tool.setuptools]
-packages = ['django_plugin_field_day']
+packages = ['django_plugin_field_day', 'django_plugin_field_day.migrations']
 
 [tool.setuptools_scm]
 
 [tool.basedpyright]
 extends = '.biobuddies/basedpyright.toml'
+# Final on a migration's dependencies/operations is a legitimate non-final to Final specialization
+reportIncompatibleVariableOverride = false
 
 [tool.ruff]
 extend = '.biobuddies/ruff.toml'
+
+# Django generates migrations without module docstrings; Final annotations satisfy RUF012 on
+# dependencies and operations.
+[tool.ruff.lint.extend-per-file-ignores]
+'**/migrations/*.py' = ['D100']
 
 [tool.pyrefly]
 project-includes = [
     "**/*.py*",
     "**/*.ipynb",
 ]
+
+# Final specializes a migration's inherited ClassVar dependencies/operations, which is deliberate
+[tool.pyrefly.errors]
+bad-override = false
