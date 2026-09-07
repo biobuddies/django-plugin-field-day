@@ -68,10 +68,10 @@ reportIncompatibleVariableOverride = false
 [tool.ruff]
 extend = '.biobuddies/ruff.toml'
 
-# Django generates migrations without module docstrings, and RunPython leaves schema_editor
-# unused. Final annotations satisfy RUF012 on dependencies and operations.
+# Django generates migrations without module docstrings; Final annotations satisfy RUF012 on
+# dependencies and operations.
 [tool.ruff.lint.extend-per-file-ignores]
-'**/migrations/*.py' = ['ARG001', 'D100']
+'**/migrations/*.py' = ['D100']
 
 [tool.pyrefly]
 project-includes = [
