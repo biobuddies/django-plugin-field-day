@@ -3,6 +3,7 @@ locale = 'en-us'
 extend-ignore-re = ['(?Rm)^.*(#|//) *noqa(: *typos)?$']
 
 [default.extend-identifiers]
+'CPY001' = 'CPY001'
 'IDentifier' = 'IDentifier' # Capitalization explaining UUID
 'iTerm2' = 'iTerm2'
 
@@ -14,6 +15,7 @@ extend-ignore-re = ['(?Rm)^.*(#|//) *noqa(: *typos)?$']
 [files]
 extend-exclude = [
     'django_plugin_field_day/countries.py',
+    'node_modules/**',
     'postgresql-keyring.asc',
 ]
 ignore-global = true
