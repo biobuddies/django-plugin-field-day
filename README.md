@@ -224,6 +224,7 @@ TODO: djp injection is all-or-nothing, so installing the plugin for `Left`, `Rig
 
 ## See Also
 
+* [wellplated](https://github.com/biobuddies/wellplated/blob/main/wellplated/fields.py): source of `CheckedCharField`
 * [pycountry](https://github.com/pycountry/pycountry): ISO 3166/4217/15924/639 databases for Python
 * [Saleor's address model](https://github.com/saleor/saleor/blob/0a11eb911e006199daa1352ff5b76a07214f43fa/saleor/account/models.py#L63)
 * [Odoo's res.partner](https://github.com/odoo/odoo/blob/19.0/odoo/addons/base/models/res_partner.py)
