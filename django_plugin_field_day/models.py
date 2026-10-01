@@ -2,6 +2,8 @@
 
 from django.db.models import PROTECT, CharField, ForeignKey, Model
 
+from django_plugin_field_day.fields import CheckedCharField
+
 
 class Country(Model):
     """ISO 3166-1 alpha-2 country, naturally keyed by its two-letter code.
@@ -32,3 +34,16 @@ class Region(Model):
 
     def __str__(self) -> str:  # noqa: D105
         return f'{self.code} {self.name}'
+
+
+class Icon(Model):
+    """Marker for a place on a map or a piece on a grid; models holding positions relate to it.
+
+    svg is expected to be a relative URL; letters are a fallback label of up to four characters.
+    """
+
+    letters = CheckedCharField(blank=True, max_length=4, min_length=0)
+    svg = CheckedCharField(blank=True, max_length=200, min_length=0)
+
+    def __str__(self) -> str:  # noqa: D105
+        return self.letters or self.svg
