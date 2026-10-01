@@ -262,9 +262,38 @@ backreferences, and flags differ between engines. `.` also differs on newlines, 
 explicit classes. On SQLite, Django supplies `REGEXP` to each connection, so other clients
 such as the `sqlite3` shell cannot write to a table with a regex constraint.
 
+### Colors
+
+`ColorField` stores a 24-bit RGB color as a plain integer, because a color is a number and
+`#rrggbb` is only how HTML and CSS happen to write it. It is a `NumberField` from `0` to
+`0xffffff`. The Python value is a `Color`: an `int` that prints as lowercase `#rrggbb` and parses
+`#rrggbb` in any letter case.
+
+```python
+from django_plugin_field_day.colors import Color
+
+str(Color('#AbCdEf'))  # '#abcdef'
+int(Color('#AbCdEf'))  # 11259375
+Color('#fffffg')  # ValidationError
+```
+
+The column is checked at every level: `CHECK` constraints in the database, `Color` parsing in
+Python, and a native `<input type="color">` in forms and the admin.
+
+`format_color` renders the integer back to `#rrggbb` in SQL using only shifts, masks, and `CHR`,
+so it behaves the same on every backend:
+
+```python
+from django_plugin_field_day import format_color
+
+Plate.objects.annotate(css=format_color('foreground')).values_list('css', flat=True)
+```
+
 ## See Also
 
 * [wellplated](https://github.com/biobuddies/wellplated/blob/main/wellplated/fields.py): checks at every level, adapted here
+* [django-colorfield](https://github.com/fabiocaccamo/django-colorfield): color picker field that stores the hex string
+* [stupid-django-tricks](https://github.com/shangxiao/stupid-django-tricks): check constraints, generated columns, and other database-first Django
 * [pycountry](https://github.com/pycountry/pycountry): ISO 3166/4217/15924/639 databases for Python
 * [Saleor's address model](https://github.com/saleor/saleor/blob/0a11eb911e006199daa1352ff5b76a07214f43fa/saleor/account/models.py#L63)
 * [Odoo's res.partner](https://github.com/odoo/odoo/blob/19.0/odoo/addons/base/models/res_partner.py)
