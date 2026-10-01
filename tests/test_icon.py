@@ -22,8 +22,12 @@ def test_letters_are_limited_to_four_characters():
 
 
 def test_admin_form_carries_html_constraints(rf: RequestFactory):
-    widget = IconAdmin(Icon, site).get_form(rf.get('/'))().fields['letters'].widget
-    assert (widget.attrs['minlength'], widget.attrs['maxlength']) == (0, 4)
+    fields = IconAdmin(Icon, site).get_form(rf.get('/'))().fields
+    assert (
+        fields['letters'].widget.attrs['minlength'],
+        fields['letters'].widget.attrs['maxlength'],
+    ) == (0, 4)
+    assert fields['foreground'].widget.input_type == 'color'
 
 
 @mark.django_db

@@ -2,11 +2,13 @@ from typing import Any
 
 import djp
 from django.db import NotSupportedError
-from django.db.models import CharField, Func, Value
+from django.db.models import Case, CharField, F, Func, Value, When
 from django.db.models.expressions import Expression
+from django.db.models.functions import Chr, Concat
 from django.db.models.functions.text import Left as DjangoLeft
 from django.db.models.functions.text import Length, Substr
 from django.db.models.functions.text import Right as DjangoRight
+from django.db.models.lookups import GreaterThan
 
 
 class Left(DjangoLeft):
@@ -124,6 +126,21 @@ class StrFTime(Func):
                 self.template.replace('%%%%z', '%%%%%%%%z')
             ),
         )
+
+
+def format_color(expression: str | Expression) -> Expression:
+    """Render a 24-bit integer column or expression as lowercase SQL #rrggbb.
+
+    Shifts, masks, and CHR agree on every backend, unlike TO_HEX, PRINTF, and HEX.
+    """
+    column = F(expression) if isinstance(expression, str) else expression
+    return Concat(
+        Value('#'),
+        *(
+            Chr(nibble + 48 + Case(When(GreaterThan(nibble, Value(9)), then=39), default=0))
+            for nibble in (column.bitrightshift(shift).bitand(15) for shift in range(20, -1, -4))
+        ),
+    )
 
 
 @djp.hookimpl

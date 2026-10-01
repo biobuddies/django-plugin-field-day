@@ -2,7 +2,7 @@
 
 from django.db.models import PROTECT, CharField, ForeignKey, Model
 
-from django_plugin_field_day.fields import CheckedCharField
+from django_plugin_field_day.fields import CheckedCharField, CheckedColorField
 
 
 class Country(Model):
@@ -42,6 +42,8 @@ class Icon(Model):
     svg is expected to be a relative URL; letters are a fallback label of up to four characters.
     """
 
+    foreground = CheckedColorField(default='#000000')
+    background = CheckedColorField(default='#ffffff')
     letters = CheckedCharField(blank=True, max_length=4, min_length=0)
     svg = CheckedCharField(blank=True, max_length=200, min_length=0)
 
