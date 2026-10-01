@@ -8,13 +8,19 @@ Models with consistent checks at every level.
 """
 
 from functools import partial
+from re import fullmatch
 from typing import Any, Self, cast
 
+from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
-from django.db.models import CharField, CheckConstraint, Model, Q, Value
+from django.db.backends.base.base import BaseDatabaseWrapper
+from django.db.models import CharField, CheckConstraint, IntegerField, Model, Q, Value
+from django.db.models.expressions import Expression
 from django.db.models.functions import Left, Length
 from django.db.models.options import Options
+from django.forms import CharField as FormCharField
 from django.forms import ChoiceField, Field
+from django.forms.widgets import Input, NumberInput
 
 CharField.register_lookup(Length)
 
@@ -161,3 +167,79 @@ class CheckedCharField(CharField):
                 help_text += f', {self.min_value}..{self.max_value}'
             field.help_text = help_text
         return field
+
+
+class Color(int):
+    """24-bit RGB number that parses and prints as lowercase #rrggbb."""
+
+    def __new__(cls, value: int | str) -> Self:
+        """Accept 0..0xffffff or #rrggbb in any letter case."""
+        number = (
+            int(value[1:], 16)
+            if isinstance(value, str) and fullmatch('#[0-9a-fA-F]{6}', value)
+            else value
+        )
+        if not isinstance(number, int) or isinstance(number, bool) or not 0 <= number <= 0xFFFFFF:
+            raise ValidationError(
+                '“%(value)s” is not a color like #1a2b3c.', code='invalid', params={'value': value}
+            )
+        return super().__new__(cls, number)
+
+    def __str__(self) -> str:  # noqa: D105
+        return f'#{self:06x}'
+
+
+class ColorInput(Input):
+    """Browsers only submit lowercase #rrggbb from the native color picker."""
+
+    input_type = 'color'
+
+
+class ColorFormField(FormCharField):
+    """Cleans to Color so unchanged initial values compare equal."""
+
+    widget = ColorInput
+
+    def to_python(self, value: Any) -> Color | None:  # noqa: D102
+        return None if value in self.empty_values else Color(value)
+
+
+class CheckedColorField(IntegerField):
+    """Database constraints, Python validation, and a native color input for 24-bit RGB colors.
+
+    Stored as a plain integer; the Python value prints as #rrggbb.
+    """
+
+    def contribute_to_class(self, cls: type[Model], name: str, private_only: bool = False) -> None:  # noqa: FBT002
+        """Set table constraints."""
+        super().contribute_to_class(cls, name, private_only=private_only)
+
+        if cls.__module__ == '__fake__':
+            return  # Avoid duplicate constraints when migrating
+
+        cls._meta.original_attrs['constraints'] = cls._meta.original_attrs.get('constraints', [])
+        check = partial(CheckedCharField.check_constraint, cls._meta, name, as_needed=False)
+        check('{column} >= {value}', gte=0)
+        check('{column} <= {value}', lte=0xFFFFFF)
+
+    def formfield(self, **kwargs: Any) -> Field | None:  # noqa: D102
+        widget = kwargs.get('widget')
+        if issubclass(widget if isinstance(widget, type) else type(widget), NumberInput):
+            del kwargs['widget']  # ModelAdmin assumes IntegerField subclasses want a number
+        defaults: dict[str, Any] = {'form_class': ColorFormField, **kwargs}
+        return super().formfield(**defaults)
+
+    def from_db_value(
+        self, value: int | None, _expression: Expression, _connection: BaseDatabaseWrapper
+    ) -> Color | None:
+        """Wrap stored integers."""
+        return None if value is None else Color(value)
+
+    def get_default(self) -> Color | None:  # noqa: D102
+        return self.to_python(super().get_default())
+
+    def get_prep_value(self, value: Any) -> int | None:  # noqa: D102
+        return None if value is None else int(Color(value))
+
+    def to_python(self, value: Any) -> Color | None:  # noqa: D102
+        return None if value is None else Color(value)

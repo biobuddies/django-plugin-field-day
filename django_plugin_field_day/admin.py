@@ -7,4 +7,4 @@ from django_plugin_field_day.models import Icon
 
 @register(Icon)
 class IconAdmin(ModelAdmin):
-    list_display = ('letters', 'svg')
+    list_display = ('letters', 'svg', 'foreground', 'background')
