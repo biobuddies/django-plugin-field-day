@@ -237,6 +237,31 @@ class Plate(Model):
     columns = NumberField(minimum=1, maximum=24)
 ```
 
+### Strings
+
+`StringField(regex=)` accepts only values that match the whole pattern, checked in three places
+from one source: a named `CHECK` constraint using the database's regular expression operator, a
+Python validator, and the HTML `pattern`. The pattern also sets the width. A pattern with a maximum
+width becomes `varchar(n)` with `minlength` and `maxlength`; an unbounded pattern becomes `text`.
+`blank` follows whether the pattern matches the empty string.
+
+```python
+from django.db.models import Model
+from django_plugin_field_day.fields import StringField
+
+
+class Plate(Model):
+    row = StringField(regex='[A-P]')  # varchar(1), required
+    label = StringField(regex='.{0,4}')  # varchar(4), blank allowed
+    note = StringField(regex='.*')  # text, blank allowed
+```
+
+A limit on length alone is still a regex, such as `.{0,4}`. Stay in the subset that Python, the
+database, and HTML agree on: anchors, classes, repetition, alternation, and groups. Lookaheads,
+backreferences, and flags differ between engines. `.` also differs on newlines, so prefer
+explicit classes. On SQLite, Django supplies `REGEXP` to each connection, so other clients
+such as the `sqlite3` shell cannot write to a table with a regex constraint.
+
 ## See Also
 
 * [wellplated](https://github.com/biobuddies/wellplated/blob/main/wellplated/fields.py): checks at every level, adapted here

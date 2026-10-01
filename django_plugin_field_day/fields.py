@@ -8,11 +8,14 @@ Fields with consistent checks at every level.
 """
 
 from collections.abc import Iterator
+from re import _parser, fullmatch  # pyrefly: ignore[missing-module-attribute]
 from typing import Any
 
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db.models import CheckConstraint, Field, IntegerField, Model, Q
+from django.forms import CharField as FormCharField
 from django.forms import Field as FormField
+from django.forms.widgets import TextInput
 
 
 class CheckedMixin(Field):
@@ -85,3 +88,50 @@ class NumberField(CheckedMixin, IntegerField):
             ),
             'BigIntegerField',
         )
+
+
+class StringField(CheckedMixin, Field):
+    """Text that fully matches regex: varchar(n) when the pattern bounds its width, else text.
+
+    Blank is allowed when the pattern matches the empty string. Stick to the subset of regular
+    expressions that Python, the database, and HTML agree on: anchors, classes, repetition,
+    alternation, and groups.
+    """
+
+    def __init__(self, *args: Any, regex: str, **kwargs: Any) -> None:
+        self.regex = regex
+        self.min_length, widest = _parser.parse(regex).getwidth()
+        blank = fullmatch(regex, '') is not None
+        if kwargs.setdefault('blank', blank) != blank:
+            raise ValueError(f'blank={not blank} contradicts regex {regex!r}')
+        # PostgreSQL varchar(n) limit
+        super().__init__(*args, max_length=widest if widest <= 10_485_760 else None, **kwargs)
+        self.validators.append(RegexValidator(rf'\A(?:{regex})\Z'))
+
+    def checks(self, name: str) -> Iterator[tuple[str, Q]]:  # noqa: D102
+        yield 'matches regex', Q(**{f'{name}__regex': f'^({self.regex})$'})
+
+    def deconstruct(self) -> tuple:  # noqa: D102
+        name, path, args, kwargs = super().deconstruct()
+        for derived in ('blank', 'max_length'):
+            kwargs.pop(derived, None)
+        return name, path, args, {**kwargs, 'regex': self.regex}
+
+    def formfield(self, **kwargs: Any) -> FormField | None:  # noqa: D102
+        defaults: dict[str, Any] = {
+            'form_class': FormCharField,
+            'max_length': self.max_length,
+            'min_length': self.min_length,
+            'widget': TextInput(attrs={'pattern': self.regex}),
+            **kwargs,
+        }
+        return super().formfield(**defaults)
+
+    def get_internal_type(self) -> str:  # noqa: D102
+        return 'TextField' if self.max_length is None else 'CharField'
+
+    def get_prep_value(self, value: Any) -> str | None:  # noqa: D102
+        return self.to_python(super().get_prep_value(value))
+
+    def to_python(self, value: Any) -> str | None:  # noqa: D102
+        return None if value is None else str(value)
