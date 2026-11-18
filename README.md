@@ -222,8 +222,24 @@ TODO: djp injection is all-or-nothing, so installing the plugin for `Left`, `Rig
 `StrFTime` also loads the Country data migration. Split the address tables into their own app
 (or gate the migration on a setting) so consumers opt into the reference data.
 
+### Numbers
+
+`NumberField(minimum=, maximum=)` stores an integer in the smallest database type that fits
+(`smallint` for `1..24`) and checks the bounds at every level: a named `CHECK` constraint, Python
+validators, and `min` and `max` on the HTML input. Either bound may be omitted.
+
+```python
+from django.db.models import Model
+from django_plugin_field_day.fields import NumberField
+
+
+class Plate(Model):
+    columns = NumberField(minimum=1, maximum=24)
+```
+
 ## See Also
 
+* [wellplated](https://github.com/biobuddies/wellplated/blob/main/wellplated/fields.py): checks at every level, adapted here
 * [pycountry](https://github.com/pycountry/pycountry): ISO 3166/4217/15924/639 databases for Python
 * [Saleor's address model](https://github.com/saleor/saleor/blob/0a11eb911e006199daa1352ff5b76a07214f43fa/saleor/account/models.py#L63)
 * [Odoo's res.partner](https://github.com/odoo/odoo/blob/19.0/odoo/addons/base/models/res_partner.py)
